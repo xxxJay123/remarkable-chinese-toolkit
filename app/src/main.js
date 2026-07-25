@@ -2,6 +2,10 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { Client } = require('ssh2');
 const fs = require('fs');
+const { assessFontInstallerSupport } = require('./firmware-policy');
+
+const SOFTWARE_VERSION_COMMAND =
+  'cat /etc/version 2>/dev/null || cat /usr/share/remarkable/update.conf 2>/dev/null || true';
 
 let mainWindow;
 
@@ -70,12 +74,18 @@ ipcMain.handle('test-connection', async (event, { ip, password }) => {
     conn.on('ready', async () => {
       clearTimeout(timeout);
       try {
-        const result = await sshExec(conn, 'cat /etc/version 2>/dev/null || echo "reMarkable"');
+        const result = await sshExec(conn, SOFTWARE_VERSION_COMMAND);
+        const version = result.stdout.trim();
+        const fontInstallerPolicy = assessFontInstallerSupport(version);
         conn.end();
-        resolve({ success: true, version: result.stdout.trim() });
+        resolve({ success: true, version, fontInstallerPolicy });
       } catch (e) {
         conn.end();
-        resolve({ success: true, version: 'reMarkable' });
+        resolve({
+          success: true,
+          version: '',
+          fontInstallerPolicy: assessFontInstallerSupport('')
+        });
       }
     });
 
@@ -105,6 +115,26 @@ ipcMain.handle('install-fonts', async (event, { ip, password, fontPaths }) => {
 
     conn.on('ready', async () => {
       try {
+        const versionResult = await sshExec(conn, SOFTWARE_VERSION_COMMAND);
+        const version = versionResult.stdout.trim();
+        const fontInstallerPolicy = assessFontInstallerSupport(version);
+
+        log(`🔎 reMarkable software：${version || '無法識別'}`);
+        if (!fontInstallerPolicy.allowed) {
+          log(`⛔ ${fontInstallerPolicy.reason}`);
+          log('• 呢個 gate 會維持到相同 firmware 完成中文 PDF／EPUB 閱讀測試。');
+          conn.end();
+          resolve({
+            success: false,
+            code: 'UNVERIFIED_FIRMWARE',
+            error: fontInstallerPolicy.reason,
+            fontInstallerPolicy
+          });
+          return;
+        }
+
+        log(`✅ ${fontInstallerPolicy.reason}`);
+
         // Step 1: Create directories
         log('📁 建立字體目錄...');
         await sshExec(conn, 'mkdir -p /home/root/.local/share/fonts/');

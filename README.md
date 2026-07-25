@@ -12,7 +12,7 @@ Chinese reading, input, and handwriting tools for reMarkable paper tablets.
 
 | 功能 | 狀態 | 備註 |
 | --- | --- | --- |
-| 中文字體安裝 | 可用／Legacy | 適合未內建完整 CJK 字體嘅穩定版系統 |
+| 中文字體安裝 | Legacy；3.28 未驗證 | 3.28+ 已由 installer safety gate 暫停 |
 | 中文輸入法核心 | 開發中 | 已加入 Qt Quick + `librime` prototype |
 | Xochitl 原生輸入 | 等候 3.28 stable SDK | Beta 期間不提供裝置安裝 |
 | 中文手寫轉文字 | 規劃中 | 中文輸入法完成後開始 |
@@ -21,6 +21,9 @@ reMarkable OS 3.28 Beta 已經改善中文顯示，但顯示中文字形、中�
 
 > [!IMPORTANT]
 > reMarkable Beta Program 條款不容許參與 Beta 時在裝置安裝第三方軟件。3.28 Beta 用戶可以參與桌面端及模擬測試，但請等 3.28 stable、對應官方 SDK 同兼容嘅 extension framework 發佈後，先安裝裝置端輸入法。
+
+> [!CAUTION]
+> 本專案目前冇 3.28 實機中文字體安裝及閱讀測試結果。唔可以假設舊 installer、fontconfig fallback、PDF／EPUB 閱讀或 OS update recovery 喺 3.28 仍然有效。Desktop app 同 CLI installer 會拒絕 3.28 或更新版本，直至指定 build 完成兼容性測試。
 
 ## 中文輸入法方向
 
@@ -46,7 +49,7 @@ reMarkable OS 3.28 Beta 已經改善中文顯示，但顯示中文字形、中�
 
 ## Desktop Toolkit
 
-Desktop app 目前保留原有中文字體管理功能，之後會成為輸入法、手寫辨識同裝置兼容性檢查嘅統一入口。
+Desktop app 目前保留原有中文字體管理功能，並會先讀取 software version。無法識別版本或版本係 3.28+ 時，字體安裝會被鎖定；之後會成為輸入法、手寫辨識同裝置兼容性檢查嘅統一入口。
 
 ### 前提條件
 
@@ -76,7 +79,7 @@ npm run build:mac
 
 ## Legacy 中文字體安裝
 
-如果你使用未內建所需中文字形嘅穩定版 reMarkable OS，可以繼續使用舊有字體功能。
+如果你使用 3.28 之前、而且已自行確認兼容嘅穩定版 reMarkable OS，可以繼續使用舊有字體功能。3.28 或更新版本目前唔支援安裝。
 
 ### Desktop app
 
@@ -99,7 +102,21 @@ chmod +x scripts/install-fonts.sh
 安裝器會將字體保存到 `/home/root/.local/share/fonts/`，建立 fontconfig fallback，再重新建立字體 cache。
 
 > [!WARNING]
-> 字體安裝會修改裝置檔案並重新啟動 Xochitl。請先備份資料，亦唔好喺 3.28 Beta 執行。
+> 字體安裝會修改裝置檔案並重新啟動 Xochitl。請先備份資料。3.28+ 同無法識別嘅 firmware 會 fail closed，唔會開始上傳或修改檔案。
+
+### 3.28 中文閱讀兼容性
+
+| 項目 | 目前狀態 |
+| --- | --- |
+| 3.28.0.163 中文字體安裝 | 未測試 |
+| PDF 內嵌中文字體 | 未測試 |
+| PDF 依賴系統 CJK fallback | 未測試 |
+| EPUB 繁體／簡體閱讀 | 未測試 |
+| Variable font 粗幼顯示 | 未測試 |
+| Restart／reboot 後保留 | 未測試 |
+| OS update recovery | 未測試 |
+
+「PDF 有內嵌字體所以睇到中文」唔代表 installer 有效；測試時必須分開檢查內嵌字體同系統 fallback。完整測試矩陣見 [docs/FONT_READING_COMPATIBILITY.md](docs/FONT_READING_COMPATIBILITY.md)。
 
 ## Roadmap
 

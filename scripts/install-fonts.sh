@@ -69,6 +69,27 @@ if ! sshpass -p "$RM_PASS" ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 r
 fi
 echo -e "${GREEN}✅ 連接成功${NC}"
 
+# --- Firmware compatibility gate ---
+RM_VERSION_RAW=$(sshpass -p "$RM_PASS" ssh root@"$RM_IP" "cat /etc/version 2>/dev/null || true" 2>/dev/null)
+RM_VERSION=$(printf '%s' "$RM_VERSION_RAW" | grep -Eo '[0-9]+\.[0-9]+(\.[0-9]+){0,2}' | head -1 || true)
+
+if [ -z "$RM_VERSION" ]; then
+    echo -e "${RED}⛔ 無法確認 reMarkable software 版本，已停止安裝。${NC}"
+    echo -e "${YELLOW}未知 firmware 唔可以安全使用 legacy 字體安裝器。${NC}"
+    exit 1
+fi
+
+IFS='.' read -r RM_MAJOR_TEXT RM_MINOR_TEXT _ <<< "$RM_VERSION"
+RM_MAJOR=$((10#$RM_MAJOR_TEXT))
+RM_MINOR=$((10#$RM_MINOR_TEXT))
+
+echo -e "${CYAN}reMarkable software: $RM_VERSION${NC}"
+if (( RM_MAJOR > 3 || (RM_MAJOR == 3 && RM_MINOR >= 28) )); then
+    echo -e "${RED}⛔ $RM_VERSION 嘅中文閱讀／字體安裝未經實機驗證。${NC}"
+    echo -e "${YELLOW}已停止安裝，避免修改未知嘅系統字體或 Xochitl 設定。${NC}"
+    exit 1
+fi
+
 # --- Create remote directories ---
 echo -e "${CYAN}[2/6] 建立字體目錄...${NC}"
 sshpass -p "$RM_PASS" ssh root@"$RM_IP" "mkdir -p /home/root/.local/share/fonts/"

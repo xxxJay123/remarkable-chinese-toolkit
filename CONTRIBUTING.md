@@ -13,6 +13,8 @@
 
 如果改動涉及裝置端安裝，請先閱讀 Beta、Developer Mode、firmware compatibility 同 recovery 章節。
 
+目前 3.28 中文字體安裝及閱讀係 **未驗證**。未有指定 firmware build 嘅實機結果之前，請勿將 3.28 標示為 supported，亦唔好移除 installer safety gate。
+
 ## 回報問題
 
 開 Issue 時請提供：
@@ -26,6 +28,14 @@
 - 完整錯誤訊息及可重現步驟
 
 請勿貼出 SSH 密碼、cloud token、MyScript key 或其他憑證。
+
+字體／閱讀問題亦請列出：
+
+- 測試文件係 PDF 或 EPUB
+- 文件有冇內嵌中文字體
+- 繁體、簡體或兩者
+- 字體檔案名稱及版本
+- Library 書名、文件內容、粗幼、restart、reboot 各自結果
 
 ## Clone 同分支
 
@@ -51,6 +61,8 @@ docs/                   Architecture and compatibility notes
 scripts/                Legacy font installer
 .github/workflows/      Build and release automation
 ```
+
+字體閱讀兼容測試程序見 [docs/FONT_READING_COMPATIBILITY.md](docs/FONT_READING_COMPATIBILITY.md)。
 
 ## Desktop app 開發
 
@@ -139,6 +151,7 @@ Beta 期間可以貢獻：
 - 唔可以將 API key 放入 renderer process 或 commit 入 repo。
 - 修改 Xochitl document store 前必須停止 Xochitl，並先備份。
 - Installer 要有清楚嘅版本／架構 gate。
+- 3.28+ 必須 fail closed，直至 exact build 通過完整中文字體閱讀矩陣。
 - 安裝失敗必須保留回復 stock 狀態嘅方法。
 - 唔可以自動改寫使用者已存在嘅 shell profile 或 systemd config 而不先備份。
 

@@ -151,6 +151,7 @@
 
     .status-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
     .status-dot.error { background: var(--red); }
+    .status-dot.unverified { background: var(--amber); }
     .status-dot.testing { background: var(--amber); animation: pulse 1s infinite; }
 
     @keyframes pulse {
@@ -323,7 +324,7 @@
       <h1>reMarkable Chinese Toolkit</h1>
       <p>中文字體 · 中文輸入法 · 中文手寫轉文字</p>
       <div class="feature-status">
-        <span>中文字體：可用</span>
+        <span>中文字體：3.28 未驗證</span>
         <strong>中文輸入法：prototype · 等候 3.28 stable SDK</strong>
       </div>
     </div>
@@ -367,6 +368,8 @@
     let fontFiles = [];
     let isConnected = false;
     let isInstalling = false;
+    let firmwareChecked = false;
+    let fontInstallerAllowed = false;
 
     const $ = (id) => document.getElementById(id);
 
@@ -495,6 +498,8 @@
 
       setStatus('testing', '連接中...');
       $('btn-test').disabled = true;
+      firmwareChecked = false;
+      fontInstallerAllowed = false;
 
       const result = await window.api.testConnection({ ip, password });
 
@@ -502,9 +507,21 @@
 
       if (result.success) {
         isConnected = true;
-        setStatus('connected', `已連接 ${result.version || ''}`);
+        firmwareChecked = true;
+        fontInstallerAllowed = result.fontInstallerPolicy?.allowed === true;
+
+        if (fontInstallerAllowed) {
+          setStatus('connected', `已連接 ${result.version || ''} · Legacy 安裝可用`);
+        } else {
+          setStatus(
+            'unverified',
+            result.fontInstallerPolicy?.reason || 'Firmware 未驗證，字體安裝已暫停'
+          );
+        }
       } else {
         isConnected = false;
+        firmwareChecked = false;
+        fontInstallerAllowed = false;
         setStatus('error', result.error || '連接失敗');
       }
       updateInstallButton();
@@ -520,10 +537,17 @@
     // --- Install ---
     function updateInstallButton() {
       const btn = $('btn-install');
-      btn.disabled = !isConnected || fontFiles.length === 0 || isInstalling;
+      btn.disabled =
+        !isConnected ||
+        !firmwareChecked ||
+        !fontInstallerAllowed ||
+        fontFiles.length === 0 ||
+        isInstalling;
 
       if (isInstalling) {
         btn.textContent = '安裝中...';
+      } else if (firmwareChecked && !fontInstallerAllowed) {
+        btn.textContent = '此 firmware 未驗證 — 暫停安裝';
       } else if (fontFiles.length === 0) {
         btn.textContent = '安裝字體';
       } else {
@@ -532,7 +556,13 @@
     }
 
     async function install() {
-      if (!isConnected || fontFiles.length === 0 || isInstalling) return;
+      if (
+        !isConnected ||
+        !firmwareChecked ||
+        !fontInstallerAllowed ||
+        fontFiles.length === 0 ||
+        isInstalling
+      ) return;
 
       isInstalling = true;
       updateInstallButton();
@@ -568,8 +598,16 @@
         $('btn-install').textContent = '✅ 安裝完成';
         $('btn-install').disabled = true;
       } else {
-        $('btn-install').textContent = '❌ 安裝失敗 — 重試';
-        $('btn-install').disabled = false;
+        if (result.code === 'UNVERIFIED_FIRMWARE') {
+          fontInstallerAllowed = false;
+          firmwareChecked = true;
+          $('btn-install').textContent = '此 firmware 未驗證 — 暫停安裝';
+          $('btn-install').disabled = true;
+          setStatus('unverified', result.error);
+        } else {
+          $('btn-install').textContent = '❌ 安裝失敗 — 重試';
+          $('btn-install').disabled = false;
+        }
       }
     }
 

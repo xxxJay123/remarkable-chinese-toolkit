@@ -65,6 +65,27 @@ try {
 } catch {}
 Write-Host "⚠️  如果要求輸入密碼，請輸入你嘅 SSH 密碼" -ForegroundColor Yellow
 
+# --- Firmware compatibility gate ---
+$versionRaw = (ssh root@$RM_IP "cat /etc/version 2>/dev/null || true").Trim()
+$versionMatch = [regex]::Match($versionRaw, '\d+\.\d+(?:\.\d+){0,2}')
+
+if (-not $versionMatch.Success) {
+    Write-Host "⛔ 無法確認 reMarkable software 版本，已停止安裝。" -ForegroundColor Red
+    Write-Host "未知 firmware 唔可以安全使用 legacy 字體安裝器。" -ForegroundColor Yellow
+    exit 1
+}
+
+$versionParts = $versionMatch.Value.Split('.')
+$versionMajor = [int]$versionParts[0]
+$versionMinor = [int]$versionParts[1]
+
+Write-Host "reMarkable software: $($versionMatch.Value)" -ForegroundColor Cyan
+if ($versionMajor -gt 3 -or ($versionMajor -eq 3 -and $versionMinor -ge 28)) {
+    Write-Host "⛔ $($versionMatch.Value) 嘅中文閱讀／字體安裝未經實機驗證。" -ForegroundColor Red
+    Write-Host "已停止安裝，避免修改未知嘅系統字體或 Xochitl 設定。" -ForegroundColor Yellow
+    exit 1
+}
+
 # --- Create remote directories ---
 Write-Host "[2/6] 建立字體目錄..." -ForegroundColor Cyan
 ssh root@$RM_IP "mkdir -p /home/root/.local/share/fonts/"
