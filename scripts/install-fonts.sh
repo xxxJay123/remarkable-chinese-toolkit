@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# reMarkable Chinese Font Installer (macOS / Linux)
+# reMarkable Chinese Toolkit - Legacy Font Installer (macOS / Linux)
 # =============================================================================
 set -e
 
@@ -12,8 +12,8 @@ NC='\033[0m'
 
 echo ""
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  reMarkable 中文字體安裝工具                      ║${NC}"
-echo -e "${CYAN}║  Chinese Font Installer for reMarkable            ║${NC}"
+echo -e "${CYAN}║  reMarkable Chinese Toolkit                       ║${NC}"
+echo -e "${CYAN}║  Legacy Chinese Font Installer                    ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 

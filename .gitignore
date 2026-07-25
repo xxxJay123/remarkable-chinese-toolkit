@@ -5,3 +5,4 @@ Thumbs.db
 *.log
 app/dist/
 app/node_modules/
+device/ime/build/

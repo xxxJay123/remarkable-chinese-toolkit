@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "remarkable-chinese-ime",
+  "displayName": "reMarkable Chinese IME",
+  "status": "prototype",
+  "engine": "librime",
+  "target": {
+    "minimumSoftwareVersion": "3.28",
+    "stableFirmwareOnly": true,
+    "matchingOfficialSdkRequired": true,
+    "architectures": [
+      "arm32",
+      "aarch64"
+    ]
+  },
+  "inputSchemes": [
+    {
+      "id": "jyut6ping3",
+      "displayName": "粵拼",
+      "upstream": "https://github.com/rime/rime-cantonese"
+    },
+    {
+      "id": "terra_pinyin",
+      "displayName": "拼音",
+      "upstream": "https://github.com/rime/rime-terra-pinyin"
+    },
+    {
+      "id": "cangjie5",
+      "displayName": "倉頡五代",
+      "upstream": "https://github.com/rime/rime-cangjie"
+    },
+    {
+      "id": "quick5",
+      "displayName": "速成",
+      "upstream": "https://github.com/rime/rime-quick"
+    }
+  ]
+}

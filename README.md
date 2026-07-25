@@ -1,254 +1,151 @@
-# reMarkable 中文字體安裝工具 | Chinese Font Installer for reMarkable
+# reMarkable Chinese Toolkit
 
-一鍵為 reMarkable 平板安裝中文字體（繁體/簡體），支援 OS 更新後自動修復。
+令 reMarkable 更完整支援中文閱讀、中文輸入同中文手寫轉文字。
 
-A one-click tool to install Chinese fonts (Traditional/Simplified) on reMarkable tablets, with auto-recovery after OS updates.
+Chinese reading, input, and handwriting tools for reMarkable paper tablets.
 
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
+![Platform](https://img.shields.io/badge/desktop-Windows%20%7C%20macOS-blue)
+![Device](https://img.shields.io/badge/device-rM2%20%7C%20Paper%20Pro%20family-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![reMarkable](https://img.shields.io/badge/reMarkable-Paper%20Pro%20%7C%20rM2-orange)
 
----
+## 專案狀態
 
-## ✨ Features
+| 功能 | 狀態 | 備註 |
+| --- | --- | --- |
+| 中文字體安裝 | 可用／Legacy | 適合未內建完整 CJK 字體嘅穩定版系統 |
+| 中文輸入法核心 | 開發中 | 已加入 Qt Quick + `librime` prototype |
+| Xochitl 原生輸入 | 等候 3.28 stable SDK | Beta 期間不提供裝置安裝 |
+| 中文手寫轉文字 | 規劃中 | 中文輸入法完成後開始 |
 
-- **Drag & Drop** — 拉字體檔案（`.ttf` / `.otf`）到 App 即自動安裝
-- **OS Update Proof** — 系統更新後 SSH 登入一次即自動修復
-- **跨平台** — 支援 macOS 同 Windows
-- **支援所有 CJK 字體** — 繁體、簡體、日文、韓文
-- **Variable Font 支援** — 一個檔案包含所有粗幼（Regular、Bold、Light 等）
+reMarkable OS 3.28 Beta 已經改善中文顯示，但顯示中文字形、中文輸入法同中文手寫辨識係三個獨立功能。本專案會先完成中文輸入，再處理中文手寫轉文字。
 
-## 📋 前提條件 | Prerequisites
+> [!IMPORTANT]
+> reMarkable Beta Program 條款不容許參與 Beta 時在裝置安裝第三方軟件。3.28 Beta 用戶可以參與桌面端及模擬測試，但請等 3.28 stable、對應官方 SDK 同兼容嘅 extension framework 發佈後，先安裝裝置端輸入法。
 
-- reMarkable 2 或 Paper Pro
-- USB 線連接電腦，或同一 WiFi 網絡
-- SSH 密碼（在 reMarkable 上：`設定 → 關於 → 版權與授權` 底部）
+## 中文輸入法方向
 
-## 🚀 快速開始 | Quick Start
+輸入法採用 [Rime](https://github.com/rime/librime) 做核心，目標支援：
 
-### 方法一：用 Desktop App（推薦）
+- 粵拼（香港繁體）
+- 普通話拼音（繁體／簡體）
+- 倉頡五代
+- 速成
+- Type Folio 鍵盤
+- reMarkable 螢幕鍵盤及候選字列
+- 常用廣東話字同 HKSCS 字形測試
 
-1. 從 [Releases](../../releases) 下載適合你系統嘅版本
-2. 打開 App
-3. 輸入 reMarkable IP 同 SSH 密碼
-4. 拉字體檔案到 App
-5. 撳 **Install** — 搞掂！
+目前 `device/ime/` 已經包含一個 Qt Quick prototype：
 
-### 方法二：用 Command Line（懶人包）
+- 真正使用 `librime` C API
+- 顯示組字文字及候選字
+- 可切換已部署嘅 Rime schema
+- 為 e-ink 設計嘅黑白、大按鈕、無動畫介面
+- ARM32（rM2）同 AArch64（Paper Pro family）共用程式碼
+
+呢個階段係 standalone 測試程式，未注入 Xochitl。詳細設計見 [中文輸入法架構](docs/IME_ARCHITECTURE.md)。
+
+## Desktop Toolkit
+
+Desktop app 目前保留原有中文字體管理功能，之後會成為輸入法、手寫辨識同裝置兼容性檢查嘅統一入口。
+
+### 前提條件
+
+- Windows 10/11 或 macOS
+- reMarkable 2 或 Paper Pro family
+- USB 連接；預設 IP：`10.11.99.1`
+- 可用嘅 SSH access
+- Paper Pro family 需要先啟用 Developer Mode
+
+### 開發模式
 
 ```bash
-# 1. Clone repo
-git clone https://github.com/YOUR_USERNAME/remarkable-chinese-fonts.git
-cd remarkable-chinese-fonts
-
-# 2. 行安裝 script
-# macOS / Linux:
-chmod +x scripts/install-fonts.sh
-./scripts/install-fonts.sh
-
-# Windows (PowerShell):
-.\scripts\install-fonts.ps1
+git clone https://github.com/xxxJay123/remarkable-chinese-toolkit.git
+cd remarkable-chinese-toolkit/app
+npm ci
+npm start
 ```
 
-Script 會問你：
-- reMarkable IP（USB: `10.11.99.1` / WiFi: 你嘅 IP）
-- SSH 密碼
-- 字體檔案路徑
+### Desktop build
 
-## 📖 懶人包（手動安裝）| Manual Guide
+```bash
+cd app
+npm run build:win
+# 或
+npm run build:mac
+```
 
-<details>
-<summary>展開完整手動安裝步驟</summary>
+## Legacy 中文字體安裝
 
-### Step 1 — 搵到你嘅 SSH 密碼
+如果你使用未內建所需中文字形嘅穩定版 reMarkable OS，可以繼續使用舊有字體功能。
 
-在 reMarkable 上：`設定 → 關於 → 版權與授權`，碌到最底搵到 SSH 密碼。
+### Desktop app
 
-### Step 2 — 傳字體去 reMarkable
+1. 用 USB 連接 reMarkable。
+2. 輸入 IP 同 SSH 密碼。
+3. 拖入 `.ttf` 或 `.otf`。
+4. 選擇安裝字體。
 
-在你電腦嘅 Terminal / PowerShell：
+### Command line
 
 ```bash
 # macOS / Linux
-scp YourFont.ttf root@10.11.99.1:/home/root/.local/share/fonts/
+chmod +x scripts/install-fonts.sh
+./scripts/install-fonts.sh
 
 # Windows PowerShell
-scp "C:\path\to\YourFont.ttf" root@10.11.99.1:/home/root/.local/share/fonts/
+.\scripts\install-fonts.ps1
 ```
 
-### Step 3 — SSH 入去設定
+安裝器會將字體保存到 `/home/root/.local/share/fonts/`，建立 fontconfig fallback，再重新建立字體 cache。
 
-```bash
-ssh root@10.11.99.1
+> [!WARNING]
+> 字體安裝會修改裝置檔案並重新啟動 Xochitl。請先備份資料，亦唔好喺 3.28 Beta 執行。
 
-# 建字體目錄（如果未有）
-mkdir -p /home/root/.local/share/fonts/
+## Roadmap
 
-# 設權限
-chmod 644 /home/root/.local/share/fonts/*.ttf
+### Phase 1 — 中文輸入法
 
-# 設定 fontconfig fallback
-cat > /home/root/.fonts.conf << 'EOF'
-<?xml version="1.0"?>
-<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-<fontconfig>
-  <alias>
-    <family>serif</family>
-    <prefer>
-      <family>Noto Serif TC</family>
-      <family>Noto Serif SC</family>
-    </prefer>
-  </alias>
-  <alias>
-    <family>sans-serif</family>
-    <prefer>
-      <family>Noto Serif TC</family>
-      <family>Noto Serif SC</family>
-    </prefer>
-  </alias>
-  <alias>
-    <family>Noto Sans</family>
-    <prefer>
-      <family>Noto Serif TC</family>
-      <family>Noto Serif SC</family>
-    </prefer>
-  </alias>
-  <alias>
-    <family>Noto Sans UI</family>
-    <prefer>
-      <family>Noto Serif TC</family>
-      <family>Noto Serif SC</family>
-    </prefer>
-  </alias>
-  <alias>
-    <family>Noto Mono</family>
-    <prefer>
-      <family>Noto Serif TC</family>
-      <family>Noto Serif SC</family>
-    </prefer>
-  </alias>
-  <match>
-    <test qual="any" name="family">
-      <string>sans-serif</string>
-    </test>
-    <edit name="family" mode="prepend" binding="strong">
-      <string>Noto Serif TC</string>
-      <string>Noto Serif SC</string>
-    </edit>
-  </match>
-  <match target="pattern">
-    <edit name="family" mode="append">
-      <string>Noto Serif TC</string>
-      <string>Noto Serif SC</string>
-    </edit>
-  </match>
-</fontconfig>
-EOF
+- [x] 將專案改名做 reMarkable Chinese Toolkit
+- [x] 建立 `librime` + Qt Quick prototype
+- [x] 定義 ARM32／AArch64 共用架構
+- [ ] 加入及驗證粵拼、拼音、倉頡、速成資料
+- [ ] 建立桌面模擬器及自動測試
+- [ ] 等候 3.28 stable SDK
+- [ ] 實機驗證 Qt Unicode commit event
+- [ ] 建立 Xovi overlay 同 Type Folio interception
+- [ ] 發佈第一個裝置端 alpha
 
-# 複製字體去系統目錄
-mount -o remount,rw /
-mkdir -p /usr/share/fonts/ttf/chinese/
-cp /home/root/.local/share/fonts/*.ttf /usr/share/fonts/ttf/chinese/
-chmod 644 /usr/share/fonts/ttf/chinese/*.ttf
-mount -o remount,ro /
+### Phase 2 — 中文手寫轉文字
 
-# 重建字體 cache
-fc-cache -f -v
+- [ ] 讀取 `.rmdoc`／`.rm` v6 筆劃
+- [ ] 香港繁體、台灣繁體、簡體辨識
+- [ ] 桌面端校對及 TXT／Markdown export
+- [ ] 安全產生新 notebook／typed-text page
+- [ ] 評估裝置端短句手寫輸入
 
-# Reboot
-reboot
-```
+## 支援範圍
 
-### Step 4 — 設定 OS Update 自動修復
+| 裝置 | CPU | 計劃 |
+| --- | --- | --- |
+| reMarkable 2 | ARM32 | 支援 |
+| reMarkable Paper Pro | AArch64 | 支援 |
+| reMarkable Paper Pro Move | AArch64 | SDK 發佈後驗證 |
+| reMarkable Paper Pure | AArch64 | SDK 發佈後驗證 |
 
-```bash
-ssh root@10.11.99.1
+Xochitl 係 proprietary application，版本之間冇兼容保證。裝置端 binary 必須同目標 firmware／SDK 明確配對，唔會使用「可能兼容」方式跨版本安裝。
 
-# 建 restore script
-cat > /home/root/restore-fonts.sh << 'SCRIPT'
-#!/bin/sh
-FONT_SRC="/home/root/.local/share/fonts"
-FONT_DST="/usr/share/fonts/ttf/chinese"
+## 貢獻
 
-if [ -d "$FONT_SRC" ] && [ ! -d "$FONT_DST" ]; then
-    mount -o remount,rw /
-    mkdir -p "$FONT_DST"
-    cp "$FONT_SRC"/Noto*.ttf "$FONT_DST"/
-    chmod 644 "$FONT_DST"/*.ttf
-    mount -o remount,ro /
-fi
+開發環境、分支規則、測試要求同輸入法資料授權注意事項，請參閱 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-fc-cache -f -v
+## Credits
 
-if [ ! -f "/etc/systemd/system/xochitl.service.d/fonts.conf" ]; then
-    mkdir -p /etc/systemd/system/xochitl.service.d/
-    cat > /etc/systemd/system/xochitl.service.d/fonts.conf << 'OVERRIDE'
-[Service]
-ExecStartPre=/home/root/restore-fonts.sh
-OVERRIDE
-    systemctl daemon-reload
-fi
-SCRIPT
-chmod +x /home/root/restore-fonts.sh
+- [Rime Input Method Engine](https://github.com/rime/librime)
+- [Rime Cantonese](https://github.com/rime/rime-cantonese)
+- [Xovi](https://github.com/asivery/xovi)
+- [reMarkable Developer Portal](https://developer.remarkable.com/)
+- [Noto Fonts](https://fonts.google.com/noto)
 
-# 設定 auto-trigger on SSH login
-cat > /home/root/.profile << 'EOF'
-if [ ! -d "/usr/share/fonts/ttf/chinese" ] || [ ! -f "/etc/systemd/system/xochitl.service.d/fonts.conf" ]; then
-    /home/root/restore-fonts.sh
-    systemctl restart xochitl
-fi
-EOF
+## License
 
-# 行一次
-/home/root/restore-fonts.sh
-systemctl restart xochitl
-```
-
-</details>
-
-## 🔧 OS Update 後點算？
-
-reMarkable 嘅 `/etc` 係 volatile overlay，每次 reboot 或 OS update 都會重置。
-
-**你嘅字體檔案同設定唔會消失**（全部喺 `/home/root/`，獨立 encrypted partition）。
-
-**主介面書名變方塊？** 只需要：
-```bash
-ssh root@10.11.99.1
-# .profile 會自動修復，等幾秒
-# 如果未自動修復：
-systemctl restart xochitl
-```
-
-**PDF/EPUB 入面嘅中文：** 通常自動 work，因為 fontconfig 會搵到 `/home/root/.local/share/fonts/` 入面嘅字體。
-
-## 📁 reMarkable 上嘅檔案結構
-
-```
-/home/root/                          ← persist（唔會被 OS update 覆蓋）
-├── .local/share/fonts/              ← 字體檔案
-│   ├── NotoSerifTC-VariableFont_wght.ttf
-│   └── NotoSerifSC-VariableFont_wght.ttf
-├── .fonts.conf                      ← fontconfig fallback 設定
-├── .profile                         ← SSH login 自動修復 trigger
-└── restore-fonts.sh                 ← 修復 script
-
-/usr/share/fonts/ttf/chinese/        ← 系統字體（OS update 會覆蓋，restore script 會修復）
-/etc/systemd/system/xochitl.service.d/fonts.conf  ← xochitl override（volatile，自動重建）
-```
-
-## ⚠️ 已知限制
-
-- **Noto Serif CJK 無 Italic** — CJK 字體普遍無斜體
-- **OS update 後主介面需要 SSH 一次** — `/etc` 係 volatile，暫時冇方法完全自動化
-- **reMarkable 空間有限** — 建議用 Variable Font（一個檔包曬所有 weight）
-
-## 🙏 Credits
-
-- [Noto Fonts by Google](https://fonts.google.com/noto) — 開源 CJK 字體
-- [reMarkable Wiki](https://remarkable.guide/) — 社群指南
-- 靈感來自 [chenhunghan 嘅 Gist](https://gist.github.com/chenhunghan/b9dbb6ad4095fa12c31838784c26073d)
-
-## 📄 License
-
-MIT License — 自由使用、修改、分發。
+程式碼以 [MIT License](LICENSE) 發佈。Rime schemas、字典、字體及其他第三方資料保留各自授權，打包或分發前必須逐項確認。

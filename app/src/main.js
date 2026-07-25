@@ -5,11 +5,14 @@ const fs = require('fs');
 
 let mainWindow;
 
+app.setName('reMarkable Chinese Toolkit');
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 680,
     height: 780,
     resizable: false,
+    title: 'reMarkable Chinese Toolkit',
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#0a0a0a',
     webPreferences: {

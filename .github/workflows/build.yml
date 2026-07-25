@@ -23,7 +23,15 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./app
-        run: npm install
+        run: npm ci
+
+      - name: Check source
+        working-directory: ./app
+        run: npm run check
+
+      - name: Run tests
+        working-directory: ./app
+        run: npm test
 
       - name: Build (macOS)
         if: matrix.os == 'macos-latest'

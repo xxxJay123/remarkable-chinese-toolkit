@@ -1,13 +1,13 @@
 # =============================================================================
-# reMarkable Chinese Font Installer (Windows PowerShell)
+# reMarkable Chinese Toolkit - Legacy Font Installer (Windows PowerShell)
 # =============================================================================
 
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║  reMarkable 中文字體安裝工具                      ║" -ForegroundColor Cyan
-Write-Host "║  Chinese Font Installer for reMarkable            ║" -ForegroundColor Cyan
+Write-Host "║  reMarkable Chinese Toolkit                       ║" -ForegroundColor Cyan
+Write-Host "║  Legacy Chinese Font Installer                    ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 

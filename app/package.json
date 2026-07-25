@@ -1,10 +1,12 @@
 {
-  "name": "remarkable-chinese-fonts",
-  "version": "1.0.0",
-  "description": "一鍵為 reMarkable 安裝中文字體 | Chinese Font Installer for reMarkable",
+  "name": "remarkable-chinese-toolkit",
+  "version": "1.1.0-alpha.1",
+  "description": "reMarkable 中文閱讀、輸入及手寫工具 | Chinese Toolkit for reMarkable",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "check": "node --check src/main.js && node --check src/preload.js && node scripts/check-renderer.js",
+    "test": "node --test",
     "build:mac": "electron-builder --mac",
     "build:win": "electron-builder --win",
     "build": "electron-builder --mac --win"
@@ -19,8 +21,8 @@
     "ssh2": "^1.15.0"
   },
   "build": {
-    "appId": "com.remarkable.chinese-fonts",
-    "productName": "reMarkable 中文字體",
+    "appId": "com.remarkable.chinese-toolkit",
+    "productName": "reMarkable Chinese Toolkit",
     "directories": {
       "output": "dist"
     },

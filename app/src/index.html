@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>reMarkable 中文字體安裝工具</title>
+  <title>reMarkable Chinese Toolkit</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -57,6 +57,24 @@
       font-size: 13px;
       color: var(--text-dim);
       line-height: 1.5;
+    }
+
+    .feature-status {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .feature-status strong {
+      color: var(--amber);
+      font-weight: 600;
     }
 
     /* --- Form --- */
@@ -302,8 +320,12 @@
 <body>
   <div class="app">
     <div class="header">
-      <h1>reMarkable 中文字體</h1>
-      <p>拉字體檔案到下方，一鍵安裝到你嘅 reMarkable</p>
+      <h1>reMarkable Chinese Toolkit</h1>
+      <p>中文字體 · 中文輸入法 · 中文手寫轉文字</p>
+      <div class="feature-status">
+        <span>中文字體：可用</span>
+        <strong>中文輸入法：prototype · 等候 3.28 stable SDK</strong>
+      </div>
     </div>
 
     <div class="form-section">
